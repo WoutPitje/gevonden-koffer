@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gevonden Voorwerpen</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Caveat:wght@500;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#211912; --bg2:#2d2219; --paper:#f4e7c9; --paper2:#e9d8b0; --ink:#2b2219; --muted:#6d5b45;
+    --leather:#8b4a2b; --leather2:#6a3519; --brass:#d1a948; --brass2:#9c7a2c; --stamp:#b5352a; --green:#3f6b3a;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg);
+    background-image:
+      radial-gradient(ellipse at 50% -10%, rgba(255,190,110,.18), transparent 60%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 2px, transparent 2px 9px),
+      linear-gradient(180deg,var(--bg2),var(--bg));
+    color:var(--paper); font-family:"Special Elite", "Courier New", monospace;
+    min-height:100vh; min-height:100dvh; -webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding:20px 16px 60px}
+  .hidden{display:none !important}
+  h1,h2,h3{margin:0; font-weight:normal}
+  button{font:inherit; cursor:pointer}
+
+  /* ---------- top bar ---------- */
+  .topbar{display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:13px; color:#cdb98f; letter-spacing:.06em; text-transform:uppercase; margin-bottom:14px}
+  .topbar .timer{font-family:Oswald, sans-serif; font-size:16px; letter-spacing:.12em; color:var(--brass)}
+
+  /* ---------- paper card ---------- */
+  .paper{
+    background:var(--paper); color:var(--ink); border-radius:6px; position:relative;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(140,100,40,.10), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(140,100,40,.12), transparent 45%),
+      linear-gradient(180deg, var(--paper), var(--paper2));
+    box-shadow:0 18px 40px rgba(0,0,0,.45), 0 2px 0 rgba(255,255,255,.4) inset;
+    padding:26px 22px;
+  }
+  .stamp{
+    display:inline-block; font-family:Oswald, sans-serif; font-weight:700; color:var(--stamp);
+    border:3px solid var(--stamp); border-radius:6px; padding:4px 10px; letter-spacing:.12em; text-transform:uppercase;
+    transform:rotate(-6deg); opacity:.85; font-size:14px;
+  }
+  .hand{font-family:Caveat, cursive; font-size:26px; line-height:1.15; color:#2a3d6e}
+  .small{font-size:14px; color:var(--muted)}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    background:linear-gradient(180deg,var(--brass),var(--brass2)); color:#2a1d0c; border:none; border-radius:999px;
+    padding:14px 26px; font-family:Oswald, sans-serif; font-size:18px; letter-spacing:.08em; text-transform:uppercase;
+    box-shadow:0 4px 0 #6d5419, 0 10px 20px rgba(0,0,0,.35); transition:transform .1s;
+  }
+  .btn:active{transform:translateY(3px); box-shadow:0 1px 0 #6d5419}
+  .btn.ghost{background:transparent; color:var(--muted); box-shadow:none; border:2px dashed #bba57a; font-size:14px; padding:8px 16px}
+
+  /* ---------- intro ---------- */
+  .intro .ticket-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; border-bottom:2px dashed #c4ad80; padding-bottom:14px; margin-bottom:16px}
+  .intro h1{font-family:Oswald, sans-serif; font-weight:700; font-size:30px; letter-spacing:.04em; text-transform:uppercase; line-height:1.05}
+  .intro p{line-height:1.6; margin:0 0 14px}
+  .fields{display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:15px; margin:16px 0 20px; background:rgba(255,255,255,.35); padding:12px 14px; border-radius:6px}
+  .fields b{font-family:Oswald, sans-serif; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-size:13px; padding-top:2px}
+
+  /* ---------- suitcase ---------- */
+  .case{position:relative; margin:4px auto 22px; max-width:520px}
+  .case-body{
+    position:relative; height:150px; border-radius:22px;
+    background:linear-gradient(180deg,var(--leather),var(--leather2));
+    box-shadow:0 20px 35px rgba(0,0,0,.55), inset 0 3px 0 rgba(255,255,255,.12), inset 0 -6px 0 rgba(0,0,0,.25);
+    display:flex; align-items:center; justify-content:space-around; padding:0 26px;
+  }
+  .case-body::before,.case-body::after{content:""; position:absolute; top:0; bottom:0; width:26px; background:linear-gradient(90deg,#4f2510,#7b3f22,#4f2510); opacity:.9}
+  .case-body::before{left:70px}
+  .case-body::after{right:70px}
+  .handle{width:130px; height:44px; margin:0 auto -8px; border:12px solid #3c1d0c; border-bottom:none; border-radius:30px 30px 0 0; position:relative; z-index:0}
+  .tag{
+    position:absolute; right:-6px; top:-30px; background:var(--paper); color:var(--ink); padding:8px 12px 8px 22px; border-radius:6px;
+    transform:rotate(8deg); font-size:12px; box-shadow:0 6px 12px rgba(0,0,0,.4); z-index:3; line-height:1.3
+  }
+  .tag::before{content:""; position:absolute; left:7px; top:50%; width:8px; height:8px; margin-top:-4px; border-radius:50%; background:var(--bg); box-shadow:inset 0 0 0 2px #a68d5d}
+  .lockicon{position:relative; z-index:2; width:56px; height:62px; display:flex; flex-direction:column; align-items:center}
+  .lockicon .shackle{width:34px; height:28px; border:7px solid var(--brass2); border-bottom:none; border-radius:18px 18px 0 0; transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+  .lockicon .lbody{width:52px; height:38px; border-radius:8px; background:linear-gradient(180deg,var(--brass),var(--brass2)); box-shadow:0 3px 0 #5b4614; display:flex; align-items:center; justify-content:center; font-family:Oswald, sans-serif; color:#3a2a0c; font-weight:700}
+  .lockicon.open .shackle{transform:translateY(-12px) rotate(-25deg); transform-origin:right bottom}
+  .lockicon.open .lbody{background:linear-gradient(180deg,#e7d18d,#b99a45)}
+  .lockicon.current .lbody{box-shadow:0 3px 0 #5b4614, 0 0 0 3px rgba(255,220,140,.6), 0 0 22px rgba(255,210,120,.6)}
+  .letters{display:flex; justify-content:center; gap:8px; margin:6px 0 18px}
+  .letters span{width:38px; height:46px; border-radius:6px; border:2px dashed #7a6447; display:flex; align-items:center; justify-content:center; font-family:Oswald, sans-serif; font-size:24px; color:var(--brass)}
+  .letters span.got{border-style:solid; border-color:var(--brass); background:rgba(209,169,72,.12); animation:pop .5s}
+  @keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+  /* ---------- puzzle ---------- */
+  .puzzle h2{font-family:Oswald, sans-serif; font-size:24px; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px}
+  .puzzle .kicker{font-family:Oswald, sans-serif; color:var(--stamp); letter-spacing:.18em; font-size:13px; text-transform:uppercase}
+  .puzzle p{line-height:1.6}
+  .label-card{
+    background:#fffaf0; border:2px solid #d6c39a; border-radius:8px; padding:14px 16px; margin:14px 0; position:relative;
+    box-shadow:0 4px 0 #d6c39a; transform:rotate(-1deg)
+  }
+  .label-card .row{display:flex; justify-content:space-between; gap:10px; border-bottom:1px dotted #cdb88c; padding:6px 0; font-size:15px}
+  .label-card .row:last-child{border:none}
+  .label-card .row span:first-child{color:var(--muted); font-size:13px; text-transform:uppercase; letter-spacing:.06em}
+
+  .quiz{display:grid; gap:16px; margin:16px 0}
+  .q{background:rgba(255,255,255,.4); border-radius:8px; padding:14px}
+  .q .qt{margin-bottom:10px; line-height:1.5}
+  .q .opts{display:grid; gap:8px}
+  .opt{
+    text-align:left; background:#fffaf0; border:2px solid #d8c69e; border-radius:8px; padding:10px 12px; display:flex; justify-content:space-between; gap:10px; align-items:center; color:var(--ink);
+  }
+  .opt .fm{font-family:Oswald, sans-serif; font-size:13px; color:#fff; background:var(--green); border-radius:4px; padding:2px 7px; white-space:nowrap}
+  .opt.sel{border-color:var(--green); background:#eef3e6}
+
+  .kas{width:100%; display:block; margin:12px 0; border-radius:10px; background:#e9f1df; border:2px solid #b8c9a4}
+  .seedlist{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0}
+  .seed{background:#fffaf0; border:2px solid #d6c39a; border-radius:6px; padding:6px 10px; font-size:14px; display:flex; align-items:center; gap:6px}
+  .seed b{font-family:Oswald, sans-serif; color:var(--stamp)}
+  .seed .e{font-size:22px}
+
+  /* combination lock */
+  .combo{display:flex; justify-content:center; gap:10px; margin:22px 0 10px}
+  .wheel{display:flex; flex-direction:column; align-items:center; gap:6px}
+  .wheel button{width:56px; height:38px; border-radius:8px; border:none; background:#d9c49a; color:#4a3a20; font-size:18px; box-shadow:0 3px 0 #a88f60}
+  .wheel button:active{transform:translateY(2px); box-shadow:0 1px 0 #a88f60}
+  .wheel .digit{
+    width:56px; height:68px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:Oswald, sans-serif; font-size:38px; color:#2b1d07;
+    background:linear-gradient(180deg,#b38d34 0%,#f0d58a 45%,#f0d58a 55%,#9d7a28 100%); box-shadow:inset 0 2px 4px rgba(0,0,0,.35), 0 3px 0 #5b4614;
+  }
+  .combo.shake{animation:shake .45s}
+  @keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+  .actions{display:flex; flex-wrap:wrap; justify-content:center; gap:12px; align-items:center; margin-top:16px}
+  .feedback{text-align:center; min-height:24px; margin-top:12px; font-family:Caveat, cursive; font-size:24px; color:var(--stamp)}
+  .feedback.ok{color:var(--green)}
+  .hintbox{margin-top:14px; background:#fff6d8; border-left:4px solid var(--brass); padding:10px 12px; border-radius:4px; font-size:15px; line-height:1.5}
+
+  /* anagram */
+  .slots,.tiles{display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin:16px 0}
+  .slot{width:46px; height:56px; border-radius:8px; border:2px dashed #b29a6a; display:flex; align-items:center; justify-content:center; font-family:Oswald, sans-serif; font-size:28px; background:rgba(255,255,255,.35)}
+  .tile{width:46px; height:56px; border-radius:8px; border:none; font-family:Oswald, sans-serif; font-size:28px; color:#2b1d07; background:linear-gradient(180deg,#f0d58a,#b9963f); box-shadow:0 4px 0 #6d5419}
+  .tile.used{visibility:hidden}
+
+  /* ---------- reveal ---------- */
+  .reveal{text-align:center}
+  .reveal .big{font-family:Oswald, sans-serif; font-weight:700; font-size:clamp(30px,8vw,52px); text-transform:uppercase; line-height:1; color:var(--brass); margin:10px 0 6px; text-shadow:0 3px 0 #4a3510}
+  .reveal .sub{font-family:Caveat, cursive; font-size:30px; color:#f7e3b3}
+  .boarding{
+    margin:26px auto; max-width:560px; text-align:left; display:grid; grid-template-columns:1fr; overflow:hidden; padding:0;
+  }
+  .boarding .bp-top{background:var(--stamp); color:#fff; padding:12px 18px; font-family:Oswald, sans-serif; letter-spacing:.14em; text-transform:uppercase; display:flex; justify-content:space-between; font-size:14px}
+  .boarding .bp-main{padding:18px}
+  .route{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px}
+  .route .city{font-family:Oswald, sans-serif; font-weight:700; font-size:34px; line-height:1}
+  .route .city small{display:block; font-family:"Special Elite", monospace; font-weight:normal; font-size:12px; color:var(--muted); letter-spacing:.05em}
+  .route .plane{font-size:26px; color:var(--stamp)}
+  .bp-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; border-top:2px dashed #c4ad80; padding-top:14px}
+  .bp-grid div span{display:block; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em}
+  .bp-grid div b{font-family:Oswald, sans-serif; font-weight:500; font-size:18px}
+  .bp-grid .wide{grid-column:1/-1}
+  .msg{max-width:560px; margin:0 auto 28px; text-align:left}
+  .polaroids{display:flex; flex-wrap:wrap; justify-content:center; gap:18px; margin:30px 0}
+  .pol{background:#fdfbf5; padding:10px 10px 14px; width:min(46%,210px); box-shadow:0 12px 24px rgba(0,0,0,.5); transform:rotate(var(--r,0deg)); transition:transform .3s}
+  .pol:hover{transform:rotate(0) scale(1.04)}
+  .pol img{width:100%; aspect-ratio:1/1; object-fit:cover; display:block; filter:sepia(.18) contrast(1.02)}
+  .pol figcaption{font-family:Caveat, cursive; color:#333; font-size:20px; text-align:center; margin-top:8px; line-height:1.05}
+  .pol.wide{width:min(96%,440px)}
+  .pol.wide img{aspect-ratio:4/3; object-position:50% 40%}
+  .sig{font-family:Caveat, cursive; font-size:30px; color:#f7e3b3; margin-top:10px}
+  canvas#confetti{position:fixed; inset:0; pointer-events:none; z-index:50}
+
+  .fade{animation:fade .6s ease both}
+  @keyframes fade{from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:none}}
+
+  @media (max-width:480px){
+    .paper{padding:20px 16px}
+    .case-body{height:120px; padding:0 14px}
+    .case-body::before{left:48px} .case-body::after{right:48px}
+    .lockicon{transform:scale(.82)}
+    .intro h1{font-size:24px}
+    .wheel .digit{width:50px; height:62px; font-size:34px}
+    .wheel button{width:50px}
+    .tag{font-size:11px; right:0; top:-34px}
+  }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="wrap">
+
+  <div class="topbar">
+    <span>Bureau Gevonden Voorwerpen</span>
+    <span class="timer" id="timer">00:00</span>
+  </div>
+
+  <!-- INTRO -->
+  <section id="intro" class="paper intro fade">
+    <div class="ticket-head">
+      <div>
+        <div class="small">Melding nr. 1511-26</div>
+        <h1>Koffer zonder<br>eigenaar</h1>
+      </div>
+      <span class="stamp">Gevonden</span>
+    </div>
+    <p>Geachte heer en mevrouw,</p>
+    <p>Bij ons bureau is een oude, bruine koffer afgegeven. Er zit een bagagelabel aan met <b>jullie adres</b>. De koffer zit wel op slot: er hangen <b>vier sloten</b> aan.</p>
+    <div class="fields">
+      <b>Gevonden</b><span>Begin november 2026</span>
+      <b>Label</b><span>B. &amp; J. — Marskramer 66, Wijchen</span>
+      <b>Inhoud</b><span>Onbekend… maar hij rammelt</span>
+      <b>Sloten</b><span>4 stuks</span>
+    </div>
+    <p>Om te bewijzen dat de koffer echt van jullie is, moeten jullie <b>samen</b> alle sloten openen. Achter elk slot vinden jullie letters. Bewaar ze goed, want die hebben jullie aan het eind nodig.</p>
+    <p class="hand">Neem er de tijd voor, pak een kop koffie en werk samen. Kom je er niet uit? Elk slot heeft een hint. 😉</p>
+    <div class="actions"><button class="btn" id="startBtn">🔎 Bekijk de koffer</button></div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game" class="hidden">
+    <div class="case">
+      <div class="handle"></div>
+      <div class="case-body" id="caseBody">
+        <div class="tag">B. &amp; J.<br>Marskramer 66<br>Wijchen</div>
+        <div class="lockicon" data-i="0"><div class="shackle"></div><div class="lbody">1</div></div>
+        <div class="lockicon" data-i="1"><div class="shackle"></div><div class="lbody">2</div></div>
+        <div class="lockicon" data-i="2"><div class="shackle"></div><div class="lbody">3</div></div>
+        <div class="lockicon" data-i="3"><div class="shackle"></div><div class="lbody">4</div></div>
+      </div>
+    </div>
+    <div class="letters" id="letters"></div>
+    <div id="puzzleHost"></div>
+  </section>
+
+  <!-- REVEAL -->
+  <section id="reveal" class="hidden reveal">
+    <div class="stamp" style="font-size:18px; transform:rotate(-4deg); color:var(--brass); border-color:var(--brass)">Koffer geopend!</div>
+    <div class="big">Gefeliciteerd<br>Bas &amp; Joyce!</div>
+    <div class="sub">53 en 54 jaar… en nog lang niet uitgepuzzeld</div>
+
+    <div class="paper boarding fade">
+      <div class="bp-top"><span>Avonturenpas</span><span>Lost &amp; Found</span></div>
+      <div class="bp-main">
+        <div class="route">
+          <div class="city">WIJ<small>Wijchen</small></div>
+          <div class="plane">✈︎</div>
+          <div class="city" style="text-align:right">VKL<small>Volkel</small></div>
+        </div>
+        <div class="bp-grid">
+          <div class="wide"><span>Bestemming</span><b>Escaperoom Lost &amp; Found, Volkel</b></div>
+          <div><span>Datum</span><b id="bpDate"></b></div>
+          <div><span>Team</span><b>6 avonturiers</b></div>
+          <div class="wide"><span>Passagiers</span><b>Bas · Joyce · Wout · Sanne · Freek · Sterre</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paper msg fade">
+      <p class="hand" style="margin-top:0">Lieve papa en mama,</p>
+      <p>Gefeliciteerd met jullie verjaardagen! Deze koffer was nog maar een opwarmertje. Het echte werk komt nog, want <b>samen met ons vieren</b> gaan jullie naar escaperoom <b>Lost &amp; Found in Volkel</b>.</p>
+      <p>Een uur lang raadsels oplossen, sloten openen en (hopelijk) op tijd ontsnappen. Met jullie ervaring van vandaag moet dat lukken… toch?</p>
+      <p style="margin-bottom:0" id="timeLine"></p>
+      <p class="hand" style="margin-bottom:0">Liefs, Wout &amp; Sanne en Freek &amp; Sterre</p>
+    </div>
+
+    <div class="sub" style="font-size:26px">Gevonden in de koffer…</div>
+    <div class="polaroids">
+      <figure class="pol" style="--r:-4deg"><img src="fotos/papa-vroeger.jpg" alt="Papa tilt een van de jongens hoog de lucht in"><figcaption>Toen al sterk in tillen</figcaption></figure>
+      <figure class="pol" style="--r:3deg"><img src="fotos/mama-hike.jpg" alt="Mama met een medaille na een wandeltocht"><figcaption>Joyce: altijd een medaille waard</figcaption></figure>
+      <figure class="pol" style="--r:-2deg"><img src="fotos/papa-dino.jpg" alt="Papa in de bek van een dinosaurus"><figcaption>Bas vs. de dino: 1–0</figcaption></figure>
+      <figure class="pol" style="--r:4deg"><img src="fotos/papa-restaurant.jpg" alt="Papa en mama uit eten"><figcaption>Proost op jullie!</figcaption></figure>
+      <figure class="pol wide" style="--r:-1.5deg"><img src="fotos/team.jpg" alt="De familie samen bij het beachvolleybal"><figcaption>Het team is er klaar voor 💪</figcaption></figure>
+    </div>
+    <div class="sig">Tot in Volkel! 🧳🔑</div>
+    <div class="actions" style="margin-top:24px"><button class="btn ghost" id="resetBtn" style="color:#cdb98f; border-color:#6d5b45">Opnieuw spelen</button></div>
+  </section>
+</div>
+
+<script>
+/* ====== Instellingen ====== */
+const CONFIG = {
+  datum: "15 november 2026",
+};
+
+/* ====== Klein geluidje ====== */
+let actx;
+function beep(freq=600, dur=.06, type="square", vol=.04){
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.value=freq; g.gain.value=vol;
+    o.connect(g); g.connect(actx.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime+dur); o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+const chime=()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.25,"triangle",.07),i*110))};
+const buzz=()=>beep(140,.3,"sawtooth",.05);
+
+/* ====== Opslag (zodat verversen geen voortgang kost) ====== */
+const store = {
+  get(){ try{ return JSON.parse(localStorage.getItem("koffer-state")) || null }catch(e){ return null } },
+  set(s){ try{ localStorage.setItem("koffer-state", JSON.stringify(s)) }catch(e){} },
+  clear(){ try{ localStorage.removeItem("koffer-state") }catch(e){} }
+};
+let state = store.get() || { started:false, step:0, startAt:null, endAt:null };
+
+/* ====== Antwoorden (licht versleuteld, zodat het niet meteen in de bron staat) ====== */
+const enc = s => btoa(unescape(encodeURIComponent(s.toLowerCase())));
+const ANS = ["MTA3","NzQx","NDI1Mw==","dm9sa2Vs"]; // 107, 741, 4253, volkel
+
+/* ====== Letters ====== */
+const LETTERS = [["L","O"],["K","E"],["V","L"]];
+
+/* ====== Puzzels ====== */
+const PUZZLES = [
+  {
+    kicker:"Slot 1 van 4", title:"Het bagagelabel",
+    html:`
+      <p>Aan het handvat hangt een vergeeld label. Iemand heeft er met de hand iets op geschreven:</p>
+      <div class="label-card">
+        <div class="row"><span>Eigenaar 1</span><span>Bas, geboren 8 november 1973</span></div>
+        <div class="row"><span>Eigenaar 2</span><span>Joyce, geboren 13 november 1972</span></div>
+        <div class="row"><span>Adres</span><span>Marskramer 66, Wijchen</span></div>
+      </div>
+      <p class="hand">"Het slot opent met hoe oud de eigenaren <u>samen</u> zijn, nu ze allebei jarig zijn geweest."</p>`,
+    digits:3,
+    hints:["Reken eerst per persoon uit hoe oud hij of zij in november 2026 wordt.","Bas: 2026 − 1973 = 53. Joyce: 2026 − 1972 = 54. Tel ze nu bij elkaar op."]
+  },
+  {
+    kicker:"Slot 2 van 4", title:"De tijdmachine-radio",
+    html:`
+      <p>Achter het eerste slot zit een oud transistorradiootje. Op het plakbriefje staat: <span class="hand">"Stem af op jullie geboortejaren!"</span></p>
+      <p>Elk goed antwoord hoort bij een zender. De drie zendernummers vormen samen de code, in dezelfde volgorde als de vragen.</p>
+      <div class="quiz" id="quiz"></div>`,
+    digits:3,
+    quiz:[
+      {q:"🚗 Vier dagen voordat Bas werd geboren (zondag 4 november 1973) was het doodstil op de Nederlandse snelwegen. Hoe kwam dat?",
+       o:[["Er was een grote staking bij tankstations","FM 2"],["Het was de eerste autoloze zondag (oliecrisis)","FM 7"],["Er werd een Elfstedentocht verreden","FM 5"]]},
+      {q:"⛸️ In Joyce' geboortejaar 1972 won een Nederlander drie keer goud op de Winterspelen in Sapporo. Wie was dat?",
+       o:[["Sven Kramer","FM 9"],["Hein Vergeer","FM 1"],["Ard Schenk","FM 4"]]},
+      {q:"🎸 Welke Nederlandse rockhit veroverde in 1973 de wereld?",
+       o:[["‘Radar Love’ van Golden Earring","FM 1"],["‘Venus’ van Shocking Blue","FM 8"],["‘Twist in My Sobriety’ van Tanita Tikaram","FM 6"]]}
+    ],
+    hints:["Ken je een antwoord niet zeker? Kijk dan welke opties sowieso niet kunnen: Sven Kramer was in 1972 nog niet eens geboren.","De goede antwoorden zijn: de autoloze zondag, Ard Schenk en Radar Love."]
+  },
+  {
+    kicker:"Slot 3 van 4", title:"De bouwtekening van de kas",
+    html:`
+      <p>Onder de radio ligt een opgevouwen bouwtekening met de titel <b>"Onze kas – tuin Marskramer 66"</b>. Iemand heeft er al flink in getekend…</p>
+      <div id="kasHost"></div>
+      <p>Op de achterkant zitten vier zaadzakjes geplakt, <b>in deze volgorde</b>:</p>
+      <div class="seedlist">
+        <div class="seed"><b>1</b><span class="e">🍅</span>Tomaat</div>
+        <div class="seed"><b>2</b><span class="e">🥒</span>Komkommer</div>
+        <div class="seed"><b>3</b><span class="e">🫑</span>Paprika</div>
+        <div class="seed"><b>4</b><span class="e">🍓</span>Aardbei</div>
+      </div>
+      <p class="hand">"Tel de oogst in de kas: dat is de code!"</p>`,
+    digits:4,
+    hints:["Tel per soort hoeveel er in de kas groeien, en zet de aantallen in de volgorde van de zaadzakjes. Laat je niet afleiden door de bij, de slak en de zonnebloem!","Tomaten: 4, komkommers: 2, paprika's: 5, aardbeien: 3."]
+  },
+  {
+    kicker:"Slot 4 van 4", title:"Het eindslot",
+    html:`
+      <p>Het laatste slot heeft geen cijfers, maar <b>letters</b>. Op het slot staat gegraveerd:</p>
+      <p class="hand">"Zes letters voor zes avonturiers. Leg ze in de goede volgorde en jullie weten waar de reis naartoe gaat."</p>
+      <div class="slots" id="slots"></div>
+      <div class="tiles" id="tiles"></div>`,
+    word:true,
+    hints:["Het is een dorp in Brabant, vlak bij Uden.","Er ligt een vliegbasis, en straaljagers stijgen er met veel lawaai op. ✈️"]
+  }
+];
+
+/* ====== Kas-tekening ====== */
+function kasSVG(){
+  const items = [
+    ["🍅",60,170],["🍅",150,120],["🍅",255,185],["🍅",395,135],
+    ["🥒",110,215],["🥒",330,105],
+    ["🫑",200,165],["🫑",300,215],["🫑",420,200],["🫑",80,120],["🫑",360,165],
+    ["🍓",175,220],["🍓",240,125],["🍓",450,150],
+    ["🌻",30,215],["🐝",280,80],["🐌",140,170]
+  ];
+  const t = items.map(([e,x,y])=>`<text x="${x}" y="${y}" font-size="30" text-anchor="middle">${e}</text>`).join("");
+  return `<svg class="kas" viewBox="0 0 500 260" role="img" aria-label="Tekening van een kas vol groenten">
+    <defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#c9d8b6" stroke-width="1"/></pattern></defs>
+    <rect width="500" height="260" fill="url(#grid)"/>
+    <path d="M15 240 V95 L250 30 L485 95 V240 Z" fill="rgba(255,255,255,.35)" stroke="#4f6b45" stroke-width="3"/>
+    <path d="M250 30 V240 M15 95 H485 M132 62 V240 M368 62 V240" stroke="#7d9670" stroke-width="2" stroke-dasharray="6 5" fill="none"/>
+    <rect x="225" y="175" width="50" height="65" fill="none" stroke="#4f6b45" stroke-width="3"/>
+    <line x1="0" y1="242" x2="500" y2="242" stroke="#6b5235" stroke-width="4"/>
+    ${t}
+    <text x="490" y="255" font-size="11" text-anchor="end" fill="#4f6b45" font-family="Special Elite">schaal 1:50 – ontwerp B&amp;J</text>
+  </svg>`;
+}
+
+/* ====== Rendering ====== */
+const $ = s => document.querySelector(s);
+function show(id){ ["intro","game","reveal"].forEach(x=>$("#"+x).classList.toggle("hidden", x!==id)); window.scrollTo({top:0, behavior:"smooth"}); }
+
+function renderLetters(){
+  const got = LETTERS.slice(0, Math.min(state.step,3)).flat();
+  $("#letters").innerHTML = Array.from({length:6},(_,i)=>`<span class="${got[i]?"got":""}">${got[i]||""}</span>`).join("");
+}
+function renderLocks(){
+  document.querySelectorAll(".lockicon").forEach(l=>{
+    const i=+l.dataset.i;
+    l.classList.toggle("open", i<state.step);
+    l.classList.toggle("current", i===state.step);
+  });
+}
+
+function renderPuzzle(){
+  renderLocks(); renderLetters();
+  const p = PUZZLES[state.step];
+  const host = $("#puzzleHost");
+  host.innerHTML = `
+    <div class="paper puzzle fade">
+      <div class="kicker">${p.kicker}</div>
+      <h2>${p.title}</h2>
+      ${p.html}
+      ${p.word ? "" : `<div class="combo" id="combo">${Array.from({length:p.digits},(_,i)=>`
+        <div class="wheel"><button data-w="${i}" data-d="1" aria-label="Omhoog">▲</button><div class="digit" id="d${i}">0</div><button data-w="${i}" data-d="-1" aria-label="Omlaag">▼</button></div>`).join("")}</div>`}
+      <div class="actions">
+        ${p.word ? `<button class="btn ghost" id="clearWord">Opnieuw leggen</button>` : `<button class="btn" id="tryBtn">🔑 Probeer code</button>`}
+        <button class="btn ghost" id="hintBtn">💡 Hint</button>
+      </div>
+      <div class="feedback" id="fb"></div>
+      <div id="hints"></div>
+    </div>`;
+
+  if(p.quiz){
+    $("#quiz").innerHTML = p.quiz.map((q,qi)=>`
+      <div class="q"><div class="qt"><b>${qi+1}.</b> ${q.q}</div>
+        <div class="opts">${q.o.map(([t,fm])=>`<button class="opt" data-q="${qi}"><span>${t}</span><span class="fm">${fm}</span></button>`).join("")}</div></div>`).join("");
+    $("#quiz").addEventListener("click", e=>{
+      const b=e.target.closest(".opt"); if(!b) return;
+      b.parentElement.querySelectorAll(".opt").forEach(x=>x.classList.toggle("sel", x===b)); beep(800,.04);
+    });
+  }
+  if(state.step===2) $("#kasHost").innerHTML = kasSVG();
+
+  // hints
+  let hintN=0;
+  $("#hintBtn").onclick=()=>{
+    if(hintN>=p.hints.length) return;
+    $("#hints").insertAdjacentHTML("beforeend", `<div class="hintbox fade"><b>Hint ${hintN+1}:</b> ${p.hints[hintN]}</div>`);
+    hintN++; if(hintN>=p.hints.length) $("#hintBtn").disabled=true, $("#hintBtn").style.opacity=.4;
+  };
+
+  if(p.word) return setupWord();
+
+  const digits = Array(p.digits).fill(0);
+  $("#combo").addEventListener("click", e=>{
+    const b=e.target.closest("button"); if(!b) return;
+    const w=+b.dataset.w; digits[w]=(digits[w]+ +b.dataset.d+10)%10; $("#d"+w).textContent=digits[w]; beep(900,.03);
+  });
+  $("#tryBtn").onclick=()=>check(digits.join(""));
+}
+
+function setupWord(){
+  const pool = ["L","O","K","E","V","L"];
+  let placed=[];
+  const draw=()=>{
+    $("#slots").innerHTML = Array.from({length:6},(_,i)=>`<div class="slot">${placed[i]!==undefined?pool[placed[i]]:""}</div>`).join("");
+    $("#tiles").innerHTML = pool.map((l,i)=>`<button class="tile ${placed.includes(i)?"used":""}" data-i="${i}">${l}</button>`).join("");
+  };
+  draw();
+  $("#tiles").addEventListener("click", e=>{
+    const b=e.target.closest(".tile"); if(!b) return;
+    placed.push(+b.dataset.i); beep(700,.04); draw();
+    if(placed.length===6){ const w=placed.map(i=>pool[i]).join(""); setTimeout(()=>{ if(!check(w)){ placed=[]; draw(); } },250); }
+  });
+  $("#clearWord").onclick=()=>{ placed=[]; draw(); };
+}
+
+function check(val){
+  const fb=$("#fb");
+  if(enc(val)===ANS[state.step]){
+    chime(); fb.className="feedback ok";
+    const got = LETTERS[state.step];
+    fb.textContent = got ? `Klik! Het slot is open. In het vakje liggen de letters ${got.join(" en ")}.` : "Klik!!";
+    state.step++; store.set(state); renderLocks(); renderLetters();
+    if(state.step>=4){ state.endAt=Date.now(); store.set(state); setTimeout(finish, 1100); }
+    else setTimeout(renderPuzzle, 2200);
+    return true;
+  } else {
+    buzz(); fb.className="feedback";
+    const msgs=["Hmm… het slot geeft niet mee.","Nope, nog dicht. Probeer het nog eens!","Bijna? Kijk nog eens goed.","Rammel rammel… nog steeds dicht."];
+    fb.textContent = msgs[Math.floor(Math.random()*msgs.length)];
+    const c=$("#combo")||$("#slots"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
+    return false;
+  }
+}
+
+/* ====== Timer ====== */
+function fmt(ms){ const s=Math.max(0,Math.floor(ms/1000)); return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+setInterval(()=>{ if(state.startAt) $("#timer").textContent = fmt((state.endAt||Date.now())-state.startAt); },500);
+
+/* ====== Finale ====== */
+function finish(){
+  $("#bpDate").textContent = CONFIG.datum;
+  const m = Math.max(1, Math.round((state.endAt-state.startAt)/60000));
+  $("#timeLine").innerHTML = `PS: jullie kraakten deze koffer in <b>${m} ${m===1?"minuut":"minuten"}</b>. In Volkel hebben jullie een uur… dus geen druk. 😄`;
+  show("reveal"); confetti();
+}
+
+function confetti(){
+  const c=$("#confetti"), x=c.getContext("2d"); c.width=innerWidth; c.height=innerHeight;
+  const cols=["#d1a948","#b5352a","#f4e7c9","#3f6b3a","#8b4a2b"];
+  const P=Array.from({length:160},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height,w:6+Math.random()*6,h:8+Math.random()*8,vy:2+Math.random()*3,vx:-1+Math.random()*2,r:Math.random()*6,vr:-.1+Math.random()*.2,c:cols[Math.floor(Math.random()*cols.length)]}));
+  let t=0; (function f(){ x.clearRect(0,0,c.width,c.height);
+    P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=p.vr; x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore();});
+    if(++t<420) requestAnimationFrame(f); else x.clearRect(0,0,c.width,c.height); })();
+}
+
+/* ====== Start ====== */
+$("#startBtn").onclick=()=>{
+  beep(500,.08);
+  if(!state.startAt){ state.startAt=Date.now(); }
+  state.started=true; store.set(state);
+  show("game"); renderPuzzle();
+};
+$("#resetBtn").onclick=()=>{ store.clear(); state={started:false,step:0,startAt:null,endAt:null}; $("#timer").textContent="00:00"; show("intro"); };
+
+if(state.step>=4){ finish(); }
+else if(state.started){ show("game"); renderPuzzle(); }
+</script>
+</body>
+</html>
